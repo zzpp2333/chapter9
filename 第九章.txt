@@ -20,7 +20,7 @@
 
 在这里，我们用公开的天气预报API获取有关天气实况、天气预报和生活指数的数据，搭建一个基于规则的天气预报生成系统。我们需要定义一个模板，根据获取到的天气数据的值对模板进行适当的选择。如果当前天气较冷，我们需要提醒用户注意保暖不要着凉；如果现在紫外线很强，我们需要提醒用户注意防晒。最终的模板如下：
 
-现在{loc}的天气是{weather}，气温{temperature}℃。[天气{dressing}，注意保暖不要着凉。|{flu}感冒，请注意保暖。|紫外线{uv}，要注意防晒哦。]未来两天{loc}的天气变化情况为：{date}，日间天气{day}，晚间天气{night}，最高气温{high}℃，最低气温{low}摄氏度，风速{wind_speed}km/h，降水量为{r}mm，相对湿度为{humidity}%。【截止到{last_update}】
+现在\{loc\}的天气是\{weather\}，气温\{temperature\}℃。[天气\{dressing\}，注意保暖不要着凉。|\{flu\}感冒，请注意保暖。|紫外线\{uv\}，要注意防晒哦。]未来两天\{loc\}的天气变化情况为：\{date\}，日间天气\{day\}，晚间天气\{night\}，最高气温\{high\}℃，最低气温\{low\}摄氏度，风速\{wind\_speed\}km/h，降水量为\{r\}mm，相对湿度为\{humidity\}\%。【截止到\{last\_update\}】
 
 \subsection{基于深度学习的聊天机器人开发} 
 
@@ -35,7 +35,9 @@
 例如，ELIZA按照如下规则\cite{t5}，判断句子“You hate me”符合以下规则，将其转换为“What makes you think I hate you”。
 
 Pattern：(* YOU ** ME) 
+
 ->
+
 Transform：(WHAT MAKES YOU THINK I ** YOU) 
 
 在ELIZA的规则中，不同关键词有着不同的优先级，关键词越少见，它的权重越高，当用户的输入中包含多个关键词时，ELIZA会选择权重更高的关键词对应的规则。同时ELIZA使用了memory trick，当检测到“my”这个词时，ELIZA认为这是和用户有关的信息，把这句话相关的结果存进一个先进先出的memory queue中。如果用户输入中没有匹配的关键词，ELIZA会回答一个无关紧要的句子或者从memory queue中推出一句话作为回答。
@@ -43,8 +45,11 @@ Transform：(WHAT MAKES YOU THINK I ** YOU)
 以下是ELIZA的规则中与memory trick相关的内容：
 
 (MEMORY MY
+
 (* MY ** = LETS DISCUSS FURTHER WHY YOUR **)
+
 (* MY ** = EARLIER YOU SAID YOUR **)
+
 (* MY ** = DOES THAT HAVE ANYTHING TO DO WITH THE FACT THAT YOUR **)
 
 在ELIZA出现之后，很多聊天机器人都采用了ELIZA的方法，例如1971年用来研究精神分裂症的PARRY，它在ELIZA的基础上加上了自己的情感状态模型，加入了恐惧和愤怒的变量，某些话题会让PARRY的恐惧或愤怒增大，那么PARRY会生成有敌意的句子。PARRY也是第一个通过了图灵测试的聊天系统。
@@ -118,12 +123,12 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
 我们以BERT模型为例\cite{t2}，在BERT的fine-tuning阶段，用$[C L S]$表示输入样本的开始，添加在输入样本的前面，用$[S E P]$把$q$和$p$序列分隔开，将$[C L S] q_{1} q_{2} \ldots q_{n}[S E P] p_{1} p_{2} \ldots p_{m}$输入模型编码器，得到$p_{i}$的embedding表示。接下来，对于每一个$p_{i}$，都需要计算它作为连续子序列的起始和结束的概率，即$P_{\text {start }}(i)$和$P_{\text {end }}(i)$。因此，模型中加入了$S$ (span-start embedding)和$E$ (span-end embedding)向量，通过计算$S$向量和$p_{i}$向量的点积，并通过softmax运算得到概率$P_{\text {start }}(i)$，$P_{\text {end }}(i)$的计算同理。最终，找到一组下标$(i, j), j \geq i$，它的概率最大，那么这一段子序列就作为答案输出。如果在文档中得不到问题的答案，模型就输出$[C L S]$。
 
 % 加图
-	\begin{figure}[ht] 
-		\centering
-		\includegraphics[width=0.4\textwidth]{9/9.1.png}
-		\caption{Bert模型}% 图注名称，简单说明
-		\label{figure9.1} %引用标注 
-	\end{figure}
+\begin{figure}[ht] 
+	\centering
+	\includegraphics{9/9.1.png}
+	\caption{Bert模型}% 图注名称，简单说明
+	\label{figure9.1} %引用标注 
+\end{figure}
 
 同样在训练模型时，段落$p$可能超出了模型编码器能处理的范围，尤其是在处理百度百科或维基百科这一类长文本的时候。因此，我们可以规定一个窗口大小，滑动这个窗口来遍历整个长文本，从中找到最佳答案。
 
