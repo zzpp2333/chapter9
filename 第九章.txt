@@ -157,7 +157,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
       Chou, Andrew  and
       Frostig, Roy  and
       Liang, Percy",
-    booktitle = "Proceedings of the 2013 Conference on Empirical Methods in Natural Language Processing",
     month = oct,
     year = "2013",
     pages = "1533--1544",
@@ -168,7 +167,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
       Chang, Ming-Wei  and
       Lee, Kenton  and
       Toutanova, Kristina",
-  booktitle = "Proceedings of the 2019 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)",
   month = jun,
   year = "2019",
   pages = "4171--4186",
@@ -190,7 +188,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
 @inproceedings{t4,
     title = "An Architecture for Data-to-Text Systems",
     author = "Reiter, Ehud",
-    booktitle = "Proceedings of the Eleventh {E}uropean Workshop on Natural Language Generation ({ENLG} 07)",
     month = jun,
     year = "2007",
     pages = "97--104",
@@ -209,7 +206,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
     title = "Information Extraction over Structured Data: Question Answering with {F}reebase",
     author = "Yao, Xuchen  and
       Van Durme, Benjamin",
-    booktitle = "Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
     month = jun,
     year = "2014",
     pages = "956--966",
