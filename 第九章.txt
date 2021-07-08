@@ -42,7 +42,7 @@ Transform：(WHAT MAKES YOU THINK I ** YOU)
 
 在ELIZA的规则中，不同关键词有着不同的优先级，关键词越少见，它的权重越高，当用户的输入中包含多个关键词时，ELIZA会选择权重更高的关键词对应的规则。同时ELIZA使用了memory trick，当检测到“my”这个词时，ELIZA认为这是和用户有关的信息，把这句话相关的结果存进一个先进先出的memory queue中。如果用户输入中没有匹配的关键词，ELIZA会回答一个无关紧要的句子或者从memory queue中推出一句话作为回答。
 
-以下是ELIZA的规则中与memory trick相关的内容：
+以下是ELIZA的规则中与memory trick相关的内容\cite{t5}：
 
 (MEMORY MY
 
@@ -58,13 +58,21 @@ Transform：(WHAT MAKES YOU THINK I ** YOU)
 
 基于语料库的方法则是从大量的人与人对话数据中学习对话特点，基于语料库的方法都是需要大量数据的，这些数据可以来自电影电视剧的对白，可以从推特、微博、豆瓣等论坛上爬取，或者由人工生成。目前聊天机器人系统的公开数据集有很多，例如UDC、Switchboard corpus、CALLHOME、 CALLFRIEND、Cornell Movie-Dialogs、心理咨询问答语料库、Topical-Chat、EMPATHETICDIALOGUES。并且在聊天机器人投入使用后，也会产生大量的数据，可以供聊天机器人系统训练使用。
 
-生成对话的方式可以是基于检索的或者生成式的。基于检索的回答方式把用户最近的输入作为查询输入query，使用信息检索的方法，从query-response语料库中检索到与用户输入匹配度最高的query，把它对应的responses作为最佳答案输出。但是仅仅把用户最近的输入作为查询，缺少了上下文信息，不具备记忆能力，很难保证聊天一致性，因此可以把之前的对话都作为查询或者使用更复杂的神经网络架构。
+生成对话的方式可以是基于检索的或者生成式的。基于检索的回答方式把用户最近的输入作为查询输入(query)，使用信息检索的方法，从query-response语料库中检索到与用户输入匹配度最高的query，把它对应的responses作为最佳答案输出。
 
-而生成式的方式则可以看作是另一种形式的机器翻译，将结构化的数据翻译为对应的文本。生成式的方法可以加入更多的上下文信息，例如把之前所有的对话，包括用户所有的输入和系统生成的回答。例如\cite{t3}使用了动态记忆网络，输入不再被认为是不相关的，通过情景记忆模块结合输入、前一时刻的记忆和问题迭代生成记忆，并且生成一个答案的向量表示，最终根据答案向量以及问题向量来生成回答。但是seq2seq方法倾向于生成一般性的回答，如果使用包含更多信息的文本作为数据集，那么聊天机器人就会更为博学。例如微软小冰收集了公开演讲和新闻数据，系统可以使用这一部分信息来回答用户的问题。
+文本匹配是许多自然语言处理任务中非常基础也是非常核心的问题，传统的匹配方法例如TF-IDF、BM25等主要是基于词频来计算两段文本的字面相似度，没有考虑语义，存在一定的局限性。因此随着深度学习的迅猛发展，基于深度学习的文本匹配方法不断出现，通常深度文本匹配方法有基于表示和基于交互的两种模式。基于表示的方法是学习句子的向量表示，根据向量距离计算句子之间的语义关系。这一类方法的结构简单、解释性强，其缺点是得到的句子表示可能会失去语义焦点，词的上下文重要性难以衡量。
 
-\subsubsection{混合方法}
+而基于交互的方法则是使用某种词对齐机制（例如，注意力机制）来建模两个句子在词层面的匹配对齐关系，聚合句子间的交互，这一方法在更细粒度上进行句子对建模，可以很好的把握语义焦点，对上下文重要性合理建模。
 
-也可以将基于规则和基于语料库的方法结合起来，例如使用多个对话生成模型，每个模型都有一个优先级，最后使用排序算法选择最优的回答输出。
+但是仅仅把用户最近的输入作为查询，只建模了单轮对话的响应选择，缺少对话的上下文信息，模型不具备记忆能力，无法保证聊天一致性，因此为了建模多轮对话响应，可以把上下文对话信息（context）拼接为一个长查询，输入神经网络得到多轮对话的表示，将多轮对话嵌入到向量中，进而得到与response的匹配概率。
+
+然而只将所有的上下文输入到网络中，以词为单位进行编码，并不能捕捉话语级别的信息和依赖关系，因此出现了更复杂的神经网络架构来进行文本的深度匹配。例如\cite{t7}提出了一种多视图响应模型（Multi-view model），使用了多粒度的特征来进行文本匹配。该模型集成了词级别（word level）和话语级别（utterance-level）的信息，不但把各轮的对话连接起来，得到多轮对话的表示进而计算词级别的匹配概率，还把话语作为一个单位，得到话语序列的嵌入表示，进而计算话语级别的匹配概率。将两项匹配概率进行综合，就是最终的匹配结果。
+
+Multi-view模型使用了基于表示的文本匹配，而\cite{t8}采用了基于交互的匹配方法，借鉴了语义匹配中的匹配矩阵，在不同的粒度上对文本进行表示。SMN模型将上下文语句中的每一个utterance和候选回复建立底层的交互，从utterance中提取重要的匹配信息，并按时间顺序累积这些匹配信息，进而得到匹配分数。
+
+随着文本匹配研究的深入，模型更多侧重于使用更多级粒度的语义表示进行更深层次的文本匹配。例如\cite{t9}没有对上下文进行简单的拼接，而是进行了两阶段轮次聚合，对每一句的作用都用一个权重衡量，识别出先前语句中重要的相关信息，并对语句关系进行恰当的建模。\cite{t10}提出了一种深度attention的方法，将词级别和话语级别的信息整合到一起，使用3D卷积网络从对话上下文的每个utterance、utterance中的每个词、response中的每个词这三个维度抽取特征，进而得到匹配概率。
+
+而生成式的方式则可以看作是另一种形式的机器翻译，将用户的输入翻译为对应的回答。\cite{t11}是第一项将对话生成问题看作翻译问题的研究，使用基于短语的统计机器翻译方法(Statistical Machine Translation, SMT)来生成应答。检索式的方法依赖于预定义的响应集合，而生成式的方法可以根据上下文信息，生成新的响应。例如\cite{t3}使用了动态记忆网络，输入不再被认为是不相关的，通过情景记忆模块结合输入、前一时刻的记忆和问题迭代生成记忆，并且生成一个答案的向量表示，最终根据答案向量以及问题向量来生成回答。但是seq2seq方法倾向于生成一般性的回答，如果使用包含更多信息的文本作为数据集，那么聊天机器人就会更为博学。例如微软小冰收集了公开演讲和新闻数据，系统可以使用这一部分信息来回答用户的问题。
 
 \subsection{自动问答系统的搭建}
 
@@ -72,7 +80,7 @@ Transform：(WHAT MAKES YOU THINK I ** YOU)
 
 \subsubsection{问答系统的分类}
 
-根据依赖的知识领域，问答系统可分为面向限定域的问答系统和面向开放域的问答系统。顾名思义，面向限定域的问答系统主要使用限定领域的语料库，只限定于回答某个领域的问题，例如最高人民法院上线的“法信（智答版）” ，能向法律职业群体提供专业的智能问答服务。而开放领域的问答系统则没有领域限制，更多用来回答事实类问题，也就是可以用简单事实来回答的问题。
+根据依赖的知识领域，问答系统可分为面向限定域的问答系统和面向开放域的问答系统。顾名思义，面向限定域的问答系统主要使用限定领域的语料库，只限定于回答某个领域的问题。而开放领域的问答系统则没有领域限制，更多用来回答事实类问题，也就是可以用简单事实来回答的问题。
 
 根据系统处理的数据格式，问答系统可分为基于结构化数据的问答系统、基于自由文本数据的问答系统、基于问题答案对数据的问答系统。结构化数据主要是指结构化数据库，系统将问题转化成query语言对数据库进行检索得出答案，自由文本数据则是预先建立的大规模真实文本语料库，系统需要对文档进行理解从中挑选出问题的答案，而问题答案对主要是指特定应用场景中的常见问题（FAQ）和社区论坛中用户的问题与回答（CAQ）。
 
@@ -106,7 +114,7 @@ B M 25(t, d)=\frac{t f_{t, d}}{k\left(1-b+b\left(\frac{d_{l}}{a v g d_{l}}\right
 
 其中$d_{l}$为文档$d$的长度，avgd $_{l}$为文档库中文档的平均长度，$b$在$[0,1]$区间内取值，如果$b=0$，那么BM25就不会进行文档长度归一化，如果$k=0$，那么BM25退化为TF-IDF。
 
-TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词语在文档库中没有出现，那么这个词不会对检索有所帮助，用户需要尽量使用文档库中含有的词语进行检索，才有可能得到预期的结果，这个问题被称作信息检索中的词汇不匹配问题(vocabulary mismatch problem)。为了解决这个问题，$q$和$d$的编码方式必须能处理一词多义和一义多词的情况，例如使用隐性语义索引（LSI）方法来进行检索，将词和文档映射到潜在语义空间，能一定程度上提高检索的精确度。还可以使用神经网络的方法来进行训练，得到$q$和$d$的嵌入表示，比如使用两个BERT模型，分别对问题$q$和文档$d$进行编码，最后计算两个向量的点积，就得到了$q$和文档$d$的相似度分数。
+TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词语在文档库中没有出现，那么这个词不会对检索有所帮助，用户需要尽量使用文档库中含有的词语进行检索，才有可能得到预期的结果，这个问题被称作信息检索中的词汇不匹配问题(vocabulary mismatch problem)。为了解决这个问题，$q$和$d$的编码方式必须能处理一词多义和一义多词的情况，例如使用隐性语义索引（LSI）方法来进行检索，将词和文档映射到潜在语义空间，能一定程度上提高检索的精确度。还可以使用深度文本匹配的方法来进行训练，得到$q$和$d$的嵌入表示，比如使用BERT模型，分别对问题$q$和文档$d$进行编码，最后计算两个向量的距离，就得到了$q$和文档$d$的相似度分数。
 
 \begin{equation}
 \operatorname{score}(q, d)=\cos (q, d)=\frac{q}{|q|} \cdot \frac{d}{|d|}
@@ -135,7 +143,7 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
 \subsubsection{基于知识图谱的方法}
 正如之前提到的，基于知识的自动问答系统的基本思想是将问题从自然语言形式转换成它的语义表达，再在结构化的语义知识库中寻找答案。这一类方法把大量的文档库数据聚合成了更为简洁的结构化知识库，减少了查询时的难度，对查询的速度也有了一定的提升。
 
-知识库通常是用RDF（Resource Description Frame资源描述框架）描述的，其中的数据采用三元组的形式，实体作为节点，关系作为边把实体和实体或者实体和属性联系起来，构成实体-关系-实体或者实体-属性-属性值的三元组。知识库的构建可以有很多方法，可以从结构化的数据直接映射为知识库，也可以利用信息抽取技术，从非结构化的文本中进行命名实体识别、关系抽取和事件抽取等来构建知识数据库，在这里我们就不过多介绍了。关于基于知识的自动问答系统目前有很多公开的数据集，例如FREE917、SimpleQuestions、FreebaseQA、DBpedia、WebQuestions、WebQuestionsSP、ComplexWebQuestions、PQ等等。
+知识库通常是用RDF（Resource Description Frame资源描述框架）描述的，其中的数据采用三元组的形式，实体作为节点，关系作为边把实体和实体或者实体和属性联系起来，构成实体-关系-实体或者实体-属性-属性值的三元组。知识库的构建可以有很多方法，可以从结构化的数据直接映射为知识库，也可以利用信息抽取技术，从非结构化的文本中进行命名实体识别、关系抽取和事件抽取等来构建知识数据库，在这里我们就不过多介绍了。基于知识的自动问答系统目前有很多公开的数据集，例如FREE917、SimpleQuestions、FreebaseQA、DBpedia、WebQuestions、WebQuestionsSP、ComplexWebQuestions、PQ等等。
 
 对知识库进行查询首先需要将问题转换成相应格式的查询语言，例如，SPARQL、λ-DCS等。那么，怎么把问题转化为它的语义表达呢？基于知识的问答系统的工作方式可以分为基于语义解析、基于答案排序的两种。
 
@@ -162,21 +170,29 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
       Chou, Andrew  and
       Frostig, Roy  and
       Liang, Percy",
-    month = oct,
+   month = oct,
     year = "2013",
     pages = "1533--1544",
 }
+
 @inproceedings{t2,
-  title = "{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding",
-  author = "Devlin, Jacob  and
-      Chang, Ming-Wei  and
-      Lee, Kenton  and
-      Toutanova, Kristina",
-  month = jun,
-  year = "2019",
-  pages = "4171--4186",
+    title = "An Architecture for Data-to-Text Systems",
+    author = "Reiter, Ehud",
+    month = jun,
+    year = "2007",
+    pages = "97--104",
 }
-@article{t3,
+
+@inproceedings{t3,
+  title = "Information Extraction over Structured Data: Question Answering with {F}reebase",
+  author = "Yao, Xuchen  and 
+            Van Durme, Benjamin",
+  month = jun,
+  year = "2014",
+  pages = "956--966",
+}
+
+@article{t4,
   author    = {Ankit Kumar and
                Ozan Irsoy and
                Jonathan Su and
@@ -190,14 +206,19 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
   journal   = {CoRR},
   year      = {2015},
 }
-@inproceedings{t4,
-    title = "An Architecture for Data-to-Text Systems",
-    author = "Reiter, Ehud",
-    month = jun,
-    year = "2007",
-    pages = "97--104",
+
+@inproceedings{t5,
+  title = "{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+  author = "Devlin, Jacob  and
+      Chang, Ming-Wei  and
+      Lee, Kenton  and
+      Toutanova, Kristina",
+  month = jun,
+  year = "2019",
+  pages = "4171--4186",
 }
-@article{t5,
+
+@article{t6,
   author = {Weizenbaum, Joseph},
   title = {ELIZA—a Computer Program for the Study of Natural Language Communication between Man and Machine},
   year = {1966},
@@ -207,11 +228,62 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
   pages = {36–45},
   numpages = {10}
 }
-@inproceedings{t6,
-    title = "Information Extraction over Structured Data: Question Answering with {F}reebase",
-    author = "Yao, Xuchen  and
-      Van Durme, Benjamin",
-    month = jun,
-    year = "2014",
-    pages = "956--966",
+
+@inproceedings{t7,
+    title = "Multi-view Response Selection for Human-Computer Conversation",
+    author = "Zhou, Xiangyang  and
+      Dong, Daxiang  and
+      Wu, Hua  and
+      Zhao, Shiqi  and
+      Yu, Dianhai  and
+      Tian, Hao  and
+      Liu, Xuan  and
+      Yan, Rui",
+    month = nov,
+    year = "2016",
+    pages = "372--381",
+}
+
+@inproceedings{t8,
+    title = "Sequential Matching Network: A New Architecture for Multi-turn Response Selection in Retrieval-Based Chatbots",
+    author = "Wu, Yu  and
+      Wu, Wei  and
+      Xing, Chen  and
+      Zhou, Ming  and
+      Li, Zhoujun",
+    month = jul,
+    year = "2017",
+    pages = "496--505",
+}
+
+@inproceedings{t9,
+  title={Modeling Multi-turn Conversation with Deep Utterance Aggregation},
+  author={ Zhang, Z.  and  Li, J.  and  Zhu, P.  and  Hai, Z.  and  Liu, G. },
+  booktitle={Proceedings of the 27th International Conference on Computational Linguistics},
+  year={2018},
+}
+
+@inproceedings{t10,
+    title = "Multi-Turn Response Selection for Chatbots with Deep Attention Matching Network",
+    author = "Zhou, Xiangyang  and
+      Li, Lu  and
+      Dong, Daxiang  and
+      Liu, Yi  and
+      Chen, Ying  and
+      Zhao, Wayne Xin  and
+      Yu, Dianhai  and
+      Wu, Hua",
+    month = jul,
+    year = "2018",
+    pages = "1118--1127",
+}
+
+@inproceedings{t11,
+    title = "Data-Driven Response Generation in Social Media",
+    author = "Ritter, Alan  and
+      Cherry, Colin  and
+      Dolan, William B.",
+    month = jul,
+    year = "2011",
+    pages = "583--593",
 }
