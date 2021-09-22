@@ -1,12 +1,15 @@
+\usepackage{listings}
+\lstset{language=python,breaklines=true,numbers=left}
+
 \section{文本生成的应用}
 
 \subsection{基于规则方法的天气预报自动生成}
 
 自然语言生成（Natural Language Generation，NLG）是研究使计算机具有人一样的表达和写作的功能，自然语言生成任务的输入形式各异，例如数据到文本（data-to-text generation）和文本到文本（text-to-text generation）都是自然语言生成的任务。摘要生成就是典型的文本到文本的生成任务，数据到文本的生成任务以结构化的数据为输入，由赫瑞瓦特大学启动的E2E Challenge就是数据到文本生成的例子。
 
-自然语言生成在方法上基本可以分成基于规则的方法和基于神经网络的方法， Reiter\cite{t4}将基于规则的NLG归纳为三步的流水线架构，其中包括：Content Determination、Sentence Planner、Surface Realizer，Content Determination负责内容的规划，通常包括内容的选择和结构的规划，在内容确定后Sentence Planner进行句子结构的规划，最后在内容和句子结构规划完成后，通过Surface Realizer生成最后的文本。
+自然语言生成在架构上可以分为流水线型（pipeline）和一体化型（integrated）两种，在方法上基本可以分成基于规则的方法和基于神经网络的方法。流水型的架构包括多个模块，模块之间相互独立串行处理，Reiter\cite{t4}将基于规则的NLG归纳为三步的流水线架构，其中包括：文本规划（Content Determination）、句子规（Sentence Planner）、句法实现（Surface Realizer），Content Determination负责内容的规划，通常包括内容的选择和结构的规划，在内容确定后Sentence Planner进行句子结构的规划，最后在内容和句子结构规划完成后，通过Surface Realizer生成最后的文本。
 
-而后随着深度学习方法的不断发展，神经网络的方法也被用于自然语言处理领域，得到了一定的突破。基于神经网络的方法采用了端到端的思路，学习数据的表示和映射关系来生成文本。
+而一体化型的自然语言生成系统的各模块之间是互相作用、共同工作的。随着深度学习方法的不断发展，神经网络的方法也被用于自然语言处理领域，得到了一定的突破。基于神经网络的方法采用了端到端的思路，学习数据的表示和映射关系来生成文本。
 
 传统的NLG任务可以分为多个子任务，包括：内容确定（Content Determination）、文本结构（Text Structuring）、句子聚合（Sentence Aggregation）、词汇化（Lexicalisation）、指代表达式生成（Referring Expression Generation）、语言实现（Linguistic Realisation）等。
 \begin{itemize}
@@ -24,8 +27,96 @@
 
 \subsection{基于深度学习的聊天机器人开发} 
 
-聊天机器人是对话系统的一种，可以使用自然语言与人对话和聊天。根据对话的需求不同，对话系统可以分为任务型、问答型和聊天型。任务型对话系统可以通过与用户对话来给用户提供帮助或者完成用户下达的指令，例如各类移动端提供的语音助手、微软Cortana等。而问答型问答系统可以回答用户的问题，例如网站上的问答机器人等。聊天机器人则大多是以娱乐为目的，没有特定的任务目标，仿照人类对话的特点，让人和机器尽可能的多聊下去，去消耗时间。这一类聊天机器人也有很多，例如微软小冰等。
+聊天机器人是对话系统的一种，可以使用自然语言与人对话和聊天。根据对话的需求不同，对话系统可以分为任务型、问答型和聊天型。任务型对话系统可以通过与用户对话来给用户提供帮助或者完成用户下达的指令，例如各类移动端提供的语音助手、微软Cortana等。而问答型问答系统可以回答用户的问题，例如网站上的问答机器人等。聊天机器人则大多是以娱乐为目的，没有特定的任务目标，仿照人类对话的特点，让人和机器尽可能的多聊下去，供用户娱乐消遣。这一类聊天机器人也有很多，例如微软小冰等。
 
+\subsubsection{任务型对话系统}
+任务型对话系统的目标是在有限的步骤内完成用户指定的任务，用户与系统对话的过程通常具有明确的目的和任务。与问答系统不同，任务型对话系统可能需要与用户进行多轮对话来获取完成任务的充足信息，在对话过程中主动向用户询问缺失的信息，不断对用户需求进行完善或修改。因此任务型对话系统需要追踪对话的状态，综合考虑用户的多轮输入选择系统的下一步动作，以保证任务的正确执行。这一模块称为对话管理模块，可以说是任务型对话系统中非常重要的一环，其中对话状态追踪和对话策略学习组成了任务型对话中至关重要的对话管理模块。
+
+任务型对话系统可以分为模块化方法和端到端方法。模块化方法主要包括自然语言理解（Natural Language Understanding，NLU）、对话状态追踪（Dialogue State Tracking，DST）、对话策略学习（Dialogue Policy Learning，DPL）、自然语言生成（Natural Language Generation，NLG）四个模块，这四个模块以流水线的形式串行工作，每一个模块负责特定的任务，并把结果传递给下一个模块。
+
+% 加图
+\begin{figure}[ht] 
+	\centering
+	\includegraphics{9/task-orisys.png}
+	\caption{任务型对话系统}% 图注名称，简单说明
+	\label{figure9.1} %引用标注 
+\end{figure}
+
+\begin{itemize}
+	\item 自然语言理解的主要任务将用户输入转化为结构化的数据，以便机器理解。通常是将用户输入映射到预定义的语义槽（semantic slots）中。
+	\item 对话状态追踪则需要维护对话状态并追踪用户需求，根据多轮对话历史和当前用户输入输出当前对话状态。
+	\item 对话策略学习根据当前对话状态生成下一步系统动作。
+	\item 自然语言生成则是根据系统动作来生成对应的自然语言。
+\end{itemize}
+
+\textbf{自然语言理解模块}
+
+为明确用户的需求，系统首先需要识别出用户的意图，并提取出与任务有关的结构化参数，才能执行相关任务，因此这一模块需要的结构化参数包括用户意图(user intent)和意图对应的槽值(slot-value)，意图和槽位共同构成了用户动作。与之对应，这一模块主要包括用户意图识别和槽值填充两个任务。具体来说，系统首先需要根据系统的定位和相关的知识库设计意图和槽位，将用户输入对应到预定义的意图中。也就是说用户意图识别实际上可以看作文本分类问题。一个意图往往对应多个槽位，可以将槽位填充任务看作序列标注任务，运用IOB标记法，把某个词标记为语义槽点开始、延续或者是非语义槽。这两个任务可以串行执行，在识别出具体意图后再进行槽位填充。也可以进行联合学习，例如\cite{t12}使用了RNN-LSTM结构进行联合学习。
+
+\textbf{对话状态追踪模块}
+
+这一模块需要在每一轮对话中估计用户的目标，输出当前的对话状态$S_{t}$。这一模块管理对话历史，根据历史对话和当前用户输入，推测出用户当前输入的具体含义，输出对话状态。对话状态$S_{t}$是一种将对话历史简化为可供系统选择下一时刻动作信息的数据结构，其中包括0时刻到t时刻的对话历史、t时刻的用户目标和目前的槽值对，通常槽位填充情况是表示对话状态最重要的指标。
+
+由于自然语言理解模块的输出不一定是正确的，可能与真实情况有一定误差，因此自然语言理解模块通常输出的是带置信度概率的N-Best列表。因此对话状态追踪模块可以从N-Best列表中选择置信度最高的结果作为输入，通常称为1-Best模式。也可以考虑N-Best列表中的所有结果，并把一个槽位的整体置信度作为判断标准，决定最终的对话状态输出。这一方法通常称为N-Best模式，与1-Bset模式相比，它为系统提供了更高的鲁棒性。基于概率分布形式的数据，对话状态追踪模块可以使用统计方法，例如传统的基于人工规则的方法、条件随机场、最大熵模型、Web Rank等方法\cite{t13}。或者使用机器学习的方法，例如基于RNN和LSTM的序列追踪模型。
+
+关于对话状态追踪，2013年微软和CMU的研究人员发起了公开评测比赛DSTC（Dialog State Tracking Challenge, https://www.microsoft.com/en-us/research/event/dialog-state-tracking-challenge/）。这一比赛中有许多评测任务，例如公交车路线查询、餐厅查询、旅游信息查询等等，比赛吸引了很多优秀的团队参与，出现了很多好的方法。下表为DSTC比赛的部分评测任务。
+
+\begin{table}[htbp]
+    \centering
+    \caption{DSTC部分评测任务}
+    \begin{tabular}{cll}
+    \hline
+    DSTC   & 评测任务  & 数据集 \\
+    DSTC1   & 公交线路查询  & 人机对话 \\ 
+	DSTC2/3 &   餐厅预订    & 人机对话    \\
+	DSTC4/5   & 旅游信息查询  & 人人对话    \\ 
+	DSTC6   & 端到端目标导向对话学习、端到端对话建模  & 人人对话    \\ 
+	DSTC7   & 多轮对话的答句选择和答句生成  & Advising和Ubuntu数据集    \\
+	DSTC8/9   & 面向多领域的端到端对话系统  & MultiWOZ 2.0/2.1    \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{对话策略学习模块}
+
+这一模块是以对话状态追踪模块输出的当前对话状态($S_{t}$)为输入，输出系统下一步需要采取的动作。例如，当前对话状态表示存在还未填充的槽位，那么模块输出的对话动作是向用户追问需要补充的信息，以完成所有必要语义槽的填充。这一模块也可以使用基于规则的方法，基于规则的方法可以很好的解决系统冷启动的问题，但是手工编写的对话策略很难涵盖所有的对话场景，不够灵活不易扩展。因此，可以使用基于统计的方法，把对话过程看作部分可见的马尔可夫决策过程，人工定义对话系统的状态后机器自动学习不同状态之间的转移关系。或者使用神经网络的方法，直接将自然语言理解模块的输出输入神经网络，以系统动作作为输出，而对话状态被建模为神经网络的隐向量。但是这一方面并没有大量的数据，其实际效果还有一定的进步空间。
+
+\textbf{自然语言生成模块}
+
+这一模块需要根据系统的下一步动作生成相应的文本，可以将这一任务看作条件语言生成（Conditioned Language Generation）任务。在实现技术上看，可以使用基于模板的或者基于基于神经网络的方法，在这里我们就不进行过多介绍了。
+
+如果要将我们上一节提到的天气预报系统改为一个简单的任务型对话系统，我们首先需要设计系统所有的可能意图和槽位。系统可以查询当天或者未来两天的天气，同时除了温度系统还可以查询紫外线情况、感冒可能性和衣着建议等方面的数据，针对多任务的系统，在定义意图和槽位时，可以将所有的意图归为更上层的“天气”领域。系统的意图和槽位定义如图。
+
+% 加图
+\begin{figure}[ht] 
+	\centering
+	\includegraphics{9/intent-slot.png}
+	\caption{意图与槽位定义}% 图注名称，简单说明
+	\label{figure9.2} %引用标注 
+\end{figure}
+
+以有限状态自动机的形式，定义系统的对话策略。在本系统中，槽位只有时间和地点两种，用0和1表示每个槽位是否被填充，那么对话状态一共有四种，（0,0）表示两个槽位都没有被填充，（0,1）表示地点槽位被填充了而时间槽位没有。相应的系统动作有三种，分别是“询问时间”、“询问地点”和“播报天气”。在初始状态下，如果对话状态追踪模块输出的状态为（0,1）或（1,0），那么下一步系统动作为“询问地点”或“询问时间”，以此来获得缺失的槽位信息。如果对话状态为（1,1），那么下一步系统动作为“播报天气”，系统将调用天气查询接口，获得相关数据后，根据系统定义的模板输出天气预报。
+
+% 加图
+\begin{figure}[ht] 
+	\centering
+	\includegraphics{9/fsm.png}
+	\caption{状态有限自动机}% 图注名称，简单说明
+	\label{figure9.3} %引用标注 
+\end{figure}
+
+在进行了最终“播报天气”后，意味着有限状态自动机工作结束，下一次任务仍然从初始状态开始，如果用户不指定时间和地点，系统仍然会进行问询。这可能会降低对话的效率，因此在一次任务结束时，我们可以不回到初始状态，仍然保留当前的槽位填充情况，如果用户不指定时间和地点，系统会直接以上一次任务的时间和地点进行查询。实际上，在真实的应用场景中，完成用户任务所需的对话轮数也是非常重要的指标，系统往往会根据用户以往的对话历史或者用户所在地，自动填补槽位值，尽可能减少对话所需的轮数。图9.4展示了一个简单的天气查询系统实现后的效果。
+
+% 加图
+\begin{figure}[ht] 
+	\centering
+	\includegraphics{9/sysdialog.png}
+	\caption{系统展示}% 图注名称，简单说明
+	\label{figure9.4} %引用标注 
+\end{figure}
+
+传统的分模块串行式系统模块之间相互依赖，并且每个模块都需要使用人工制定规则或需要使用大量的数据进行训练。当要将系统迁移到另一个领域中使用时，需要修改规则重新定义槽位，收集大量的数据进行重新训练，系统的可迁移性不高。因此，就有研究者尝试研究端到端的任务型对话系统。例如\cite{t14}仍然按照模块化的结构搭建了系统，但使用了端到端的方式进行训练，提高了系统的可迁移性。
+
+\subsubsection{聊天机器人}
 自然语言是十分复杂的，在我们的日常对话中，存在非常多的歧义或多义，要让程序与人类进行自然的对话是十分困难的。早期的对话系统是基于规则实现的，方法简单也取得了不错的效果，但难以适应较为复杂的对话任务。随着深度学习的发展，端到端的模型被应用到了聊天机器人任务中，模型能从对话语料库中自动学习对话知识，摆脱了对于规则的依赖。
 
 \subsubsection{基于规则的方法}
@@ -74,6 +165,23 @@ Multi-view模型使用了基于表示的文本匹配，而\cite{t8}采用了基�
 
 而生成式的方式则可以看作是另一种形式的机器翻译，将用户的输入翻译为对应的回答。\cite{t11}是第一项将对话生成问题看作翻译问题的研究，使用基于短语的统计机器翻译方法(Statistical Machine Translation, SMT)来生成应答。检索式的方法依赖于预定义的响应集合，而生成式的方法可以根据上下文信息，生成新的响应。例如\cite{t3}使用了动态记忆网络，输入不再被认为是不相关的，通过情景记忆模块结合输入、前一时刻的记忆和问题迭代生成记忆，并且生成一个答案的向量表示，最终根据答案向量以及问题向量来生成回答。但是seq2seq方法倾向于生成一般性的回答，如果使用包含更多信息的文本作为数据集，那么聊天机器人就会更为博学。例如微软小冰收集了公开演讲和新闻数据，系统可以使用这一部分信息来回答用户的问题。
 
+关于简单聊天机器人的构建，同学们可以参考pytorch提供的Chatbot Tutorial（$https://pytorch.org/tutorials/beginner/chatbot\_tutorial.html$），教程中使用Cornell Movie-Dialogs数据集搭建了seq2seq模型，其算法流程如下。
+
+\begin{algorithm}
+    \caption{聊天机器人系统整体流程}
+    \begin{algorithmic}[1] %每行显示行号
+    \Require Cornell Movie-Dialogs数据集
+    \Ensure 训练好的闲聊机器人模型
+    \State 读取Cornell Movie-Dialogs数据集，将数据集转化为query+response句对的形式。
+    \For{$iteration = 1 \to n\_iteration+1$} repeat
+        \State 把数据输入传入encoder
+        \State 把decoder初始隐状态设为encoder最后时刻的隐状态，并初始化decoder的输入，进行decoder的forward计算
+        \State 计算loss、反向计算梯度并对梯度进行裁剪 
+        \State 更新模型参数
+    \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
 \subsection{自动问答系统的搭建}
 
 随着互联网的发展，互联网中的信息量飞速增长，越来越多的用户利用互联网进行学习工作。用户向搜索引擎提出问题，在搜索引擎返回的一系列网页中寻找答案，而自动问答系统是信息检索系统的另一种形式，与搜索引擎不同，自动问答系统可以直接用简洁、准确的文字返回与用户问题有关的答案。
@@ -90,7 +198,7 @@ Multi-view模型使用了基于表示的文本匹配，而\cite{t8}采用了基�
 
 基于信息检索的自动问答系统依赖于大量网页或科学论文文本，它的基本思路是，建立大量的本地文档库，用户输入问题$q$后，根据问题在文档库中进行检索，选择$n$个与用户问题最相关的文档，并通过答案抽取系统，在文档中选择出最符合用户问题的回答$a$。
 
-我们首先考虑文档库检索模块，这一部分属于信息检索问题，在实际应用中，也可以通过调用搜索引擎来实现。对于文档库中的每一个文档$d$，系统都需要按照一定的标准计算出与问题$q$的相似度，并选择其中相似度最高的前$n$个文档。传统方法就是基于词频统计（例如TF-IDF、BM25）来计算$q$与每篇文档$d$的相似度。使用TF-IDF对词语进行编码，得到的是稀疏的向量。
+我们首先考虑文档库检索模块，这一部分属于信息检索问题，在实际应用中，也可以通过调用搜索引擎（例如ElasticSearch）来实现。对于文档库中的每一个文档$d$，系统都需要按照一定的标准计算出与问题$q$的相似度，并选择其中相似度最高的前$n$个文档。传统方法就是基于词频统计（例如TF-IDF、BM25）来计算$q$与每篇文档$d$的相似度。
 
 在对文档库进行预处理后，就形成了一个词汇表，对词汇表中的每个词都计算了TF、IDF和TF-IDF值并进行保存。那么对问题$q$中的每个词$t$，计算$t$与文档$d$的相似度分数，并进行相加：
 
@@ -124,21 +232,166 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
 
 \subsubsection{阅读理解模型}
 
-在完成了文档库的检索后，就需要在检索出来的文档中抽取出最符合问题的片段。这一步通常是用机器阅读理解模型，模型可以从文档中抽取一段子序列作为答案，也可以根据文档生成一段答案。在这里，我们讨论抽取式的阅读理解模型，模型将问题和文档作为输入，从文档中抽取能回答问题的连续子序列，把该子序列作为正确答案$a$并返回。
+在完成了文档库的检索后，就需要在检索出来的文档中抽取出最符合问题的片段。这一步通常是用机器阅读理解模型（MRC， Machine Reading Comprehension），模型可以从文档中抽取一段子序列作为答案，也可以根据文档生成一段答案。在这里，我们讨论抽取式的阅读理解模型，模型将问题和文档作为输入，从文档中抽取能回答问题的连续子序列，把该子序列作为正确答案$a$并返回。
 
 对于问题$q\left(q_{1}, q_{2}, \ldots, q_{n}\right)$，以及段落$p\left(p_{1}, p_{2}, \ldots, p_{m}\right)$，模型的目标是要最大化概率$P(a \mid q, p)$。如果答案子序列$a$在段落$p$中对应的下标为$a_{s}, a_{s+1}, \ldots, a_{e}$，即$a=p_{a_{s}} p_{a_{s+1}} \ldots p_{a_{e}}$，那么模型的目标可以简化为最大化概率$P(a \mid q, p)=P_{\text {start }}\left(a_{s} \mid q, p\right) P_{\text {end }}\left(a_{e} \mid q, p\right)$。
 
-我们以BERT模型为例\cite{t2}，在BERT的fine-tuning阶段，用$[C L S]$表示输入样本的开始，添加在输入样本的前面，用$[S E P]$把$q$和$p$序列分隔开，将$[C L S] q_{1} q_{2} \ldots q_{n}[S E P] p_{1} p_{2} \ldots p_{m}$输入模型编码器，得到$p_{i}$的embedding表示。接下来，对于每一个$p_{i}$，都需要计算它作为连续子序列的起始和结束的概率，即$P_{\text {start }}(i)$和$P_{\text {end }}(i)$。因此，模型中加入了$S$ (span-start embedding)和$E$ (span-end embedding)向量，通过计算$S$向量和$p_{i}$向量的点积，并通过softmax运算得到概率$P_{\text {start }}(i)$，$P_{\text {end }}(i)$的计算同理。最终，找到一组下标$(i, j), j \geq i$，它的概率最大，那么这一段子序列就作为答案输出。如果在文档中得不到问题的答案，模型就输出$[C L S]$。
+我们以BERT-MRC模型为例\cite{t2}，这一模型结构简单，是MRC领域的baseline。在BERT的fine-tuning阶段，用$[C L S]$表示输入样本的开始，添加在输入样本的前面，用$[S E P]$把$q$和$p$序列分隔开，将$[C L S] q_{1} q_{2} \ldots q_{n}[S E P] p_{1} p_{2} \ldots p_{m}$输入模型编码器，得到$p_{i}$的embedding表示。接下来，对于每一个$p_{i}$，都需要计算它作为连续子序列的起始和结束的概率，即$P_{\text {start }}(i)$和$P_{\text {end }}(i)$。因此，模型中加入了$S$ (span-start embedding)和$E$ (span-end embedding)向量，通过计算$S$向量和$p_{i}$向量的点积，再经过softmax运算得到概率$P_{\text {start }}(i)$，$P_{\text {end }}(i)$的计算同理。最终，找到一组下标$(i, j), j \geq i$，它的概率最大，那么这一段子序列就作为答案输出。如果在文档中得不到问题的答案，模型就输出$[C L S]$。
 
 % 加图
 \begin{figure}[ht] 
 	\centering
-	\includegraphics{9/9.1.png}
+	\includegraphics{9/bert.png}
 	\caption{Bert模型}% 图注名称，简单说明
-	\label{figure9.1} %引用标注 
+	\label{figure9.5} %引用标注 
 \end{figure}
 
-同样在训练模型时，段落$p$可能超出了模型编码器能处理的范围，尤其是在处理百度百科或维基百科这一类长文本的时候。因此，我们可以规定一个窗口大小，滑动这个窗口来遍历整个长文本，从中找到最佳答案。
+同学们可以参考Google提供的机器阅读理解代码($https://github.com/google-research/bert/blob/master/run\_squad.py$)，使用BERT预训练模型和SQuAD数据集训练机器阅读理解模型。
+
+\begin{algorithm}
+    \caption{任务型对话系统整体流程}
+    \begin{algorithmic}[1] %每行显示行号
+    \Require SQuAD数据集
+    \Ensure 训练好的阅读理解模型
+    \State 读取输入数据，将其转化为[CLS]+query+[SEP]+paragraph的形式
+    \State 构建模型结构，输入数据进行训练
+    \State 模型验证
+    \end{algorithmic}
+\end{algorithm}
+
+在这里我们引用$run\_squad.py$中与模型创建以及loss计算有关的代码，来对模型进行介绍。首先，调用$model\_fn\_builder$，获得estimator所需的模型参数$model\_fn$，然后创建tf.contrib.tpu.TPUEstimator实例estimator，使用estimator进行训练、评估或预测。
+
+\begin{lstlisting}
+def main(_):
+  . . .
+  # 调用model_fn_builder 获得TPUEstimatorSpec
+  model_fn = model_fn_builder(
+      bert_config=bert_config,
+      init_checkpoint=FLAGS.init_checkpoint,
+      learning_rate=FLAGS.learning_rate,
+      num_train_steps=num_train_steps,
+      num_warmup_steps=num_warmup_steps,
+      use_tpu=FLAGS.use_tpu,
+      use_one_hot_embeddings=FLAGS.use_tpu)
+
+  # If TPU is not available, this will fall back to normal Estimator on CPU
+  # or GPU.
+  estimator = tf.contrib.tpu.TPUEstimator(
+      use_tpu=FLAGS.use_tpu,
+      model_fn=model_fn,
+      config=run_config,
+      train_batch_size=FLAGS.train_batch_size,
+      predict_batch_size=FLAGS.predict_batch_size)
+
+  if FLAGS.do_train:
+    . . .
+    train_input_fn = input_fn_builder(
+        input_file=train_writer.filename,
+        seq_length=FLAGS.max_seq_length,
+        is_training=True,
+        drop_remainder=True)
+    estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
+    . . .
+  if FLAGS.do_predict:
+    . . .
+    predict_input_fn = input_fn_builder(
+        input_file=eval_writer.filename,
+        seq_length=FLAGS.max_seq_length,
+        is_training=False,
+        drop_remainder=False)
+
+    # If running eval on the TPU, you will need to specify the number of
+    # steps.
+    all_results = []
+    for result in estimator.predict(
+        predict_input_fn, yield_single_examples=True):
+    . . .
+\end{lstlisting}
+
+其中$model\_fn\_builder$函数返回的是网络模型函数$model\_fn$，$model\_fn$函数首先调用了$create\_model$函数定义了模型的结构，并获得了返回值$start\_logits$和$end\_logits$，对应模型输出的概率。在此基础上根据当前的模式，将调用程序所需的信息填入tf.contrib.tpu.TPUEstimatorSpec，返回不同的TPUEstimatorSpec实例。
+
+如果当前为训练模式，则通过预测值和真实值进行loss值的计算，填入TPUEstimatorSpec的loss字段，用loss来更新网络参数。假设$p_{i}^{\prime}$表示模型输出值，那么$P_{\text {start }}(i)$（$P_{\text {end }}(i)$同理）和$Loss$的公式定义如下\cite{t5}：
+
+$P_{\text {start }}(i)=\frac{\exp \left(p_{i}^{\prime}\right)}{\sum_{j} \exp \left(p_{j}^{\prime}\right)}$
+
+$Loss=-\log P_{\text {start }}(i)-\log P_{e n d}(i)$
+
+\begin{lstlisting}
+def model_fn_builder(bert_config, init_checkpoint, learning_rate,
+                     num_train_steps, num_warmup_steps, use_tpu,
+                     use_one_hot_embeddings):
+  """Returns `model_fn` closure for TPUEstimator."""
+  # 创建 Estimator所需的模型函数model_fn
+  def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
+    """The `model_fn` for TPUEstimator."""
+  # 定义模型 根据mode值 创建不同的tf.contrib.tpu.TPUEstimatorSpec实例并返回 
+    . . .
+    # 得到答案的start和end的位置 然后计算loss
+    (start_logits, end_logits) = create_model(
+        bert_config=bert_config,
+        is_training=is_training,
+        input_ids=input_ids,
+        input_mask=input_mask,
+        segment_ids=segment_ids,
+        use_one_hot_embeddings=use_one_hot_embeddings)
+    . . .
+    if mode == tf.estimator.ModeKeys.TRAIN:
+      seq_length = modeling.get_shape_list(input_ids)[1]
+      
+      def compute_loss(logits, positions):
+        one_hot_positions = tf.one_hot(
+            positions, depth=seq_length, dtype=tf.float32)
+        log_probs = tf.nn.log_softmax(logits, axis=-1)
+        loss = -tf.reduce_mean(
+            tf.reduce_sum(one_hot_positions * log_probs, axis=-1))
+        return loss
+      # 计算相应的loss
+      start_positions = features["start_positions"]
+      end_positions = features["end_positions"]
+
+      start_loss = compute_loss(start_logits, start_positions)
+      end_loss = compute_loss(end_logits, end_positions)
+
+      total_loss = (start_loss + end_loss) / 2.0
+    . . .
+\end{lstlisting}
+
+$create\_model$函数定义了模型的网络结构和损失函数，模型从modeling.BertModel中（相关代码参见$https://github.com/google-research/bert/blob/master/modeling.py$）取出模型的最后一层输出，将其输入一个全连接层，这个全连接层的输出就对应了答案子序列的start和end的概率。
+
+\begin{lstlisting}
+def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
+                 use_one_hot_embeddings):
+  """Creates a classification model."""
+  model = modeling.BertModel(
+      config=bert_config,
+      is_training=is_training,
+      input_ids=input_ids,
+      input_mask=input_mask,
+      token_type_ids=segment_ids,
+      use_one_hot_embeddings=use_one_hot_embeddings)
+  # BertModel的最后一层输出
+  final_hidden = model.get_sequence_output()
+
+  . . .
+  
+  # 再加一个全连接层，将全连接层的输出unstack成两个部分
+  # 分别对应start和end概率
+  final_hidden_matrix = tf.reshape(final_hidden,
+                                   [batch_size * seq_length, hidden_size])
+  logits = tf.matmul(final_hidden_matrix, output_weights, transpose_b=True)
+  logits = tf.nn.bias_add(logits, output_bias)
+
+  logits = tf.reshape(logits, [batch_size, seq_length, 2])
+  logits = tf.transpose(logits, [2, 0, 1])
+
+  unstacked_logits = tf.unstack(logits, axis=0)
+
+  (start_logits, end_logits) = (unstacked_logits[0], unstacked_logits[1])
+
+  return (start_logits, end_logits)
+\end{lstlisting}
+
+在训练模型时，段落p可能超出了模型编码器能处理的范围，尤其是百度百科或维基百科这一类长文本数据，可以用滑动窗口来读取数据。实际上$run\_squad.py$中就使用了滑动窗口法，将过长的段落p分成了多个DocSpan，为每一个DocSpan生成一个[CLS]+query+[SEP]+DocSpan形式的数据。
 
 \subsubsection{基于知识图谱的方法}
 正如之前提到的，基于知识的自动问答系统的基本思想是将问题从自然语言形式转换成它的语义表达，再在结构化的语义知识库中寻找答案。这一类方法把大量的文档库数据聚合成了更为简洁的结构化知识库，减少了查询时的难度，对查询的速度也有了一定的提升。
@@ -174,7 +427,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
     year = "2013",
     pages = "1533--1544",
 }
-
 @inproceedings{t2,
     title = "An Architecture for Data-to-Text Systems",
     author = "Reiter, Ehud",
@@ -191,7 +443,6 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
   year = "2014",
   pages = "956--966",
 }
-
 @article{t4,
   author    = {Ankit Kumar and
                Ozan Irsoy and
@@ -286,4 +537,38 @@ TF-IDF、BM25这类基于词频的方法有一个缺陷，如果问题$q$有词�
     month = jul,
     year = "2011",
     pages = "583--593",
+}
+
+@inproceedings{t12,
+  title={Multi-Domain Joint Semantic Frame Parsing using Bi-directional RNN-LSTM},
+  author={D Hakkani-Tür and  Tur, G.  and  Celikyilmaz, A.  and  Chen, Y. N.  and  Wang, Y. Y. },
+  booktitle={The 17th Annual Meeting of the International Speech Communication Association (INTERSPEECH 2016)},
+  year={2016},
+}
+
+@article{t13,
+  author    = {Hongshen Chen and
+               Xiaorui Liu and
+               Dawei Yin and
+               Jiliang Tang},
+  title     = {A Survey on Dialogue Systems: Recent Advances and New Frontiers},
+  journal   = {CoRR},
+  volume    = {abs/1711.01731},
+  year      = {2017},
+}
+
+@inproceedings{t14,
+    title = "A Network-based End-to-End Trainable Task-oriented Dialogue System",
+    author = "Wen, Tsung-Hsien  and
+      Vandyke, David  and
+      Mrk{\v{s}}i{\'c}, Nikola  and
+      Ga{\v{s}}i{\'c}, Milica  and
+      Rojas-Barahona, Lina M.  and
+      Su, Pei-Hao  and
+      Ultes, Stefan  and
+      Young, Steve",
+    booktitle = "Proceedings of the 15th Conference of the {E}uropean Chapter of the Association for Computational Linguistics: Volume 1, Long Papers",
+    month = apr,
+    year = "2017",
+    pages = "438--449",
 }
